@@ -4,6 +4,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any, Final
 
+from aioshelly.ble.const import BLE_CODE
 from aioshelly.block_device import BlockDevice
 from aioshelly.common import ConnectionOptions, get_info
 from aioshelly.const import BLOCK_GENERATIONS, RPC_GENERATIONS
@@ -21,10 +22,16 @@ from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_USERNAME
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.helpers.selector import SelectSelector, SelectSelectorConfig
+from homeassistant.helpers.selector import (
+    SelectSelector,
+    SelectSelectorConfig,
+    TextSelector,
+    TextSelectorConfig,
+)
 
 from .const import (
     CONF_BLE_SCANNER_MODE,
+    CONF_BLE_SCRIPT,
     CONF_SLEEP_PERIOD,
     DOMAIN,
     LOGGER,
@@ -383,21 +390,25 @@ class OptionsFlowHandler(OptionsFlow):
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
 
+        data_schema = {
+            vol.Required(
+                CONF_BLE_SCANNER_MODE,
+                default=self.config_entry.options.get(
+                    CONF_BLE_SCANNER_MODE, BLEScannerMode.DISABLED
+                ),
+            ): SelectSelector(
+                SelectSelectorConfig(
+                    options=BLE_SCANNER_OPTIONS,
+                    translation_key=CONF_BLE_SCANNER_MODE,
+                ),
+            ),
+            vol.Required(
+                CONF_BLE_SCRIPT,
+                default=self.config_entry.options.get(CONF_BLE_SCRIPT, BLE_CODE),
+            ): TextSelector(TextSelectorConfig(multiline=True)),
+        }
+
         return self.async_show_form(
             step_id="init",
-            data_schema=vol.Schema(
-                {
-                    vol.Required(
-                        CONF_BLE_SCANNER_MODE,
-                        default=self.config_entry.options.get(
-                            CONF_BLE_SCANNER_MODE, BLEScannerMode.DISABLED
-                        ),
-                    ): SelectSelector(
-                        SelectSelectorConfig(
-                            options=BLE_SCANNER_OPTIONS,
-                            translation_key=CONF_BLE_SCANNER_MODE,
-                        ),
-                    ),
-                }
-            ),
+            data_schema=vol.Schema(data_schema),
         )

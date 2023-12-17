@@ -30,6 +30,7 @@ async def async_connect_scanner(
     hass: HomeAssistant,
     coordinator: ShellyRpcCoordinator,
     scanner_mode: BLEScannerMode,
+    ble_script: str,
 ) -> CALLBACK_TYPE:
     """Connect scanner."""
     device = coordinator.device
@@ -55,6 +56,7 @@ async def async_connect_scanner(
         interval_ms=DEFAULT_INTERVAL_MS,
         window_ms=DEFAULT_WINDOW_MS,
         duration_ms=DEFAULT_DURATION_MS,
+        ble_code=ble_script,
     )
 
     @hass_callback

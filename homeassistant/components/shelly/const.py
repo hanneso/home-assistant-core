@@ -184,6 +184,7 @@ ENTRY_RELOAD_COOLDOWN = 60
 SHELLY_GAS_MODELS = [MODEL_GAS]
 
 CONF_BLE_SCANNER_MODE = "ble_scanner_mode"
+CONF_BLE_SCRIPT = "ble_script"
 
 
 class BLEScannerMode(StrEnum):

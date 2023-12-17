@@ -9,6 +9,7 @@ from typing import Any, Generic, TypeVar, cast
 
 import aioshelly
 from aioshelly.ble import async_ensure_ble_enabled, async_stop_scanner
+from aioshelly.ble.const import BLE_CODE
 from aioshelly.block_device import BlockDevice, BlockUpdateType
 from aioshelly.const import MODEL_VALVE
 from aioshelly.exceptions import DeviceConnectionError, InvalidAuthError, RpcCallError
@@ -33,6 +34,7 @@ from .const import (
     ATTR_GENERATION,
     BATTERY_DEVICES_WITH_PERMANENT_CONNECTION,
     CONF_BLE_SCANNER_MODE,
+    CONF_BLE_SCRIPT,
     CONF_SLEEP_PERIOD,
     DATA_CONFIG_ENTRY,
     DOMAIN,
@@ -582,6 +584,8 @@ class ShellyRpcCoordinator(ShellyCoordinatorBase[RpcDevice]):
         ble_scanner_mode = self.entry.options.get(
             CONF_BLE_SCANNER_MODE, BLEScannerMode.DISABLED
         )
+        ble_script = self.entry.options.get(CONF_BLE_SCRIPT, BLE_CODE)
+
         if ble_scanner_mode == BLEScannerMode.DISABLED and self.connected:
             await async_stop_scanner(self.device)
             return
@@ -590,7 +594,7 @@ class ShellyRpcCoordinator(ShellyCoordinatorBase[RpcDevice]):
             # the scanner since it will be disconnected anyway
             return
         self._disconnected_callbacks.append(
-            await async_connect_scanner(self.hass, self, ble_scanner_mode)
+            await async_connect_scanner(self.hass, self, ble_scanner_mode, ble_script)
         )
 
     @callback
