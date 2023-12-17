@@ -35,6 +35,7 @@ from .const import (
     BATTERY_DEVICES_WITH_PERMANENT_CONNECTION,
     CONF_BLE_SCANNER_MODE,
     CONF_BLE_SCRIPT,
+    CONF_BLE_SCRIPT_DEFAULT,
     CONF_SLEEP_PERIOD,
     DATA_CONFIG_ENTRY,
     DOMAIN,
@@ -584,7 +585,10 @@ class ShellyRpcCoordinator(ShellyCoordinatorBase[RpcDevice]):
         ble_scanner_mode = self.entry.options.get(
             CONF_BLE_SCANNER_MODE, BLEScannerMode.DISABLED
         )
-        ble_script = self.entry.options.get(CONF_BLE_SCRIPT, BLE_CODE)
+        if self.entry.options.get(CONF_BLE_SCRIPT_DEFAULT, True):
+            ble_script = BLE_CODE
+        else:
+            ble_script = self.entry.options.get(CONF_BLE_SCRIPT, BLE_CODE)
 
         if ble_scanner_mode == BLEScannerMode.DISABLED and self.connected:
             await async_stop_scanner(self.device)

@@ -185,6 +185,7 @@ SHELLY_GAS_MODELS = [MODEL_GAS]
 
 CONF_BLE_SCANNER_MODE = "ble_scanner_mode"
 CONF_BLE_SCRIPT = "ble_script"
+CONF_BLE_SCRIPT_DEFAULT = "ble_script_default"
 
 
 class BLEScannerMode(StrEnum):

@@ -68,7 +68,9 @@
       "init": {
         "description": "Bluetooth scanning can be active or passive. With active, the Shelly requests data from nearby devices; with passive, the Shelly receives unsolicited data from nearby devices.",
         "data": {
-          "ble_scanner_mode": "Bluetooth scanner mode"
+          "ble_scanner_mode": "Bluetooth scanner mode",
+          "ble_script": "Script running on the shelly device",
+          "ble_script_default": "Use default script from aioshelly"
         }
       }
     }

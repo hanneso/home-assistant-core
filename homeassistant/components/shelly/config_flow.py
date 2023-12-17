@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+import logging
 from typing import Any, Final
 
 from aioshelly.ble.const import BLE_CODE
@@ -32,6 +33,7 @@ from homeassistant.helpers.selector import (
 from .const import (
     CONF_BLE_SCANNER_MODE,
     CONF_BLE_SCRIPT,
+    CONF_BLE_SCRIPT_DEFAULT,
     CONF_SLEEP_PERIOD,
     DOMAIN,
     LOGGER,
@@ -49,6 +51,8 @@ from .utils import (
     get_ws_context,
     mac_address_from_name,
 )
+
+_LOGGER = logging.getLogger(__name__)
 
 HOST_SCHEMA: Final = vol.Schema({vol.Required(CONF_HOST): str})
 
@@ -390,25 +394,41 @@ class OptionsFlowHandler(OptionsFlow):
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
 
-        data_schema = {
-            vol.Required(
-                CONF_BLE_SCANNER_MODE,
-                default=self.config_entry.options.get(
-                    CONF_BLE_SCANNER_MODE, BLEScannerMode.DISABLED
+        data_schema = vol.Schema(
+            {
+                vol.Required(
+                    CONF_BLE_SCANNER_MODE,
+                    default=self.config_entry.options.get(
+                        CONF_BLE_SCANNER_MODE, BLEScannerMode.DISABLED
+                    ),
+                ): SelectSelector(
+                    SelectSelectorConfig(
+                        options=BLE_SCANNER_OPTIONS,
+                        translation_key=CONF_BLE_SCANNER_MODE,
+                    ),
                 ),
-            ): SelectSelector(
-                SelectSelectorConfig(
-                    options=BLE_SCANNER_OPTIONS,
-                    translation_key=CONF_BLE_SCANNER_MODE,
-                ),
-            ),
-            vol.Required(
-                CONF_BLE_SCRIPT,
-                default=self.config_entry.options.get(CONF_BLE_SCRIPT, BLE_CODE),
-            ): TextSelector(TextSelectorConfig(multiline=True)),
-        }
+            }
+        )
+        if self.show_advanced_options:
+            _LOGGER.info("Foo")
+            data_schema = data_schema.extend(
+                {
+                    vol.Required(
+                        CONF_BLE_SCRIPT_DEFAULT,
+                        default=self.config_entry.options.get(
+                            CONF_BLE_SCRIPT_DEFAULT, True
+                        ),
+                    ): bool,
+                    vol.Required(
+                        CONF_BLE_SCRIPT,
+                        default=self.config_entry.options.get(
+                            CONF_BLE_SCRIPT, BLE_CODE
+                        ),
+                    ): TextSelector(TextSelectorConfig(multiline=True)),
+                }
+            )
 
         return self.async_show_form(
             step_id="init",
-            data_schema=vol.Schema(data_schema),
+            data_schema=data_schema,
         )
